@@ -28,6 +28,11 @@ public class MQProperties {
     private boolean    transaction            = false;           // 是否开启事务
     private Properties properties             = new Properties();
 
+    // flatMessage with type
+    private boolean    castBaseType           = false;
+    private boolean    castDateTime           = false;
+    private int        flatMessageMode        = 0;
+
     // idempotence
     private boolean    idemEnable             = false;
     private String     idemServers            = "127.0.0.1:6379";
@@ -278,6 +283,30 @@ public class MQProperties {
         this.idemKeyPrefix = idemKeyPrefix;
     }
 
+    public boolean isCastBaseType() {
+        return castBaseType;
+    }
+
+    public void setCastBaseType(boolean castBaseType) {
+        this.castBaseType = castBaseType;
+    }
+
+    public boolean isCastDateTime() {
+        return castDateTime;
+    }
+
+    public void setCastDateTime(boolean castDateTime) {
+        this.castDateTime = castDateTime;
+    }
+
+    public int getFlatMessageMode() {
+        return flatMessageMode;
+    }
+
+    public void setFlatMessageMode(int flatMessageMode) {
+        this.flatMessageMode = flatMessageMode;
+    }
+
     @Override
     public String toString() {
         return "MQProperties{" + "servers='" + servers + '\'' + ", retries=" + retries
@@ -288,9 +317,10 @@ public class MQProperties {
             + ", flatMessage=" + flatMessage + ", compressionType='" + compressionType + '\''
             + ", acks='" + acks + '\'' + ", aliyunAccessKey='" + aliyunAccessKey + '\''
             + ", aliyunSecretKey='" + aliyunSecretKey + '\'' + ", transaction=" + transaction
-            + ", properties=" + properties + ", idemServers='" + idemServers + '\''
-            + ", idemUsername='" + idemUsername + '\'' + ", idemPassword='" + idemPassword + '\''
-            + ", idemDatabase='" + idemDatabase + '\'' + ", idemKeyPrefix='" + idemKeyPrefix + '\''
-            + '}';
+            + ", properties=" + properties + ", castBaseType=" + castBaseType + ", castDateTime="
+            + castDateTime + ", flatMessageMode=" + flatMessageMode + ", idemEnable=" + idemEnable
+            + ", idemServers='" + idemServers + '\'' + ", idemUsername='" + idemUsername + '\''
+            + ", idemPassword='" + idemPassword + '\'' + ", idemDatabase='" + idemDatabase + '\''
+            + ", idemKeyPrefix='" + idemKeyPrefix + '\'' + '}';
     }
 }

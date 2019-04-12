@@ -1,10 +1,11 @@
 package com.alibaba.otter.canal.protocol;
 
+
+import com.google.common.collect.Lists;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author machengyuan 2018-9-13 下午10:31:14
@@ -26,8 +27,8 @@ public class FlatMessage implements Serializable {
     private String                    sql;
     private Map<String, Integer>      sqlType;
     private Map<String, String>       mysqlType;
-    private List<Map<String, String>> data;
-    private List<Map<String, String>> old;
+    private List<Map<String, Object>> data;
+    private List<Map<String, Object>> old;
 
     public FlatMessage() {
     }
@@ -123,19 +124,19 @@ public class FlatMessage implements Serializable {
         this.mysqlType = mysqlType;
     }
 
-    public List<Map<String, String>> getData() {
+    public List<Map<String, Object>> getData() {
         return data;
     }
 
-    public void setData(List<Map<String, String>> data) {
+    public void setData(List<Map<String, Object>> data) {
         this.data = data;
     }
 
-    public List<Map<String, String>> getOld() {
+    public List<Map<String, Object>> getOld() {
         return old;
     }
 
-    public void setOld(List<Map<String, String>> old) {
+    public void setOld(List<Map<String, Object>> old) {
         this.old = old;
     }
 

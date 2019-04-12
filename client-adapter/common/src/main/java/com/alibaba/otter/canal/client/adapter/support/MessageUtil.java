@@ -1,10 +1,10 @@
 package com.alibaba.otter.canal.client.adapter.support;
 
-import java.util.*;
-
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.alibaba.otter.canal.protocol.Message;
+
+import java.util.*;
 
 /**
  * Message对象解析工具类
@@ -151,25 +151,25 @@ public class MessageUtil {
         // if (flatMessage.getSqlType() == null || flatMessage.getMysqlType() == null) {
         // throw new RuntimeException("SqlType or mysqlType is null");
         // }
-        List<Map<String, String>> data = flatMessage.getData();
+        List<Map<String, Object>> data = flatMessage.getData();
         if (data != null) {
             dml.setData(changeRows(dml.getTable(), data, flatMessage.getSqlType(), flatMessage.getMysqlType()));
         }
-        List<Map<String, String>> old = flatMessage.getOld();
+        List<Map<String, Object>> old = flatMessage.getOld();
         if (old != null) {
             dml.setOld(changeRows(dml.getTable(), old, flatMessage.getSqlType(), flatMessage.getMysqlType()));
         }
         return dml;
     }
 
-    private static List<Map<String, Object>> changeRows(String table, List<Map<String, String>> rows, Map<String, Integer> sqlTypes,
+    private static List<Map<String, Object>> changeRows(String table, List<Map<String, Object>> rows, Map<String, Integer> sqlTypes,
                                                         Map<String, String> mysqlTypes) {
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, String> row : rows) {
+        for (Map<String, Object> row : rows) {
             Map<String, Object> resultRow = new LinkedHashMap<>();
-            for (Map.Entry<String, String> entry : row.entrySet()) {
+            for (Map.Entry<String, Object> entry : row.entrySet()) {
                 String columnName = entry.getKey();
-                String columnValue = entry.getValue();
+                String columnValue = (String) entry.getValue();
 
                 Integer sqlType = sqlTypes.get(columnName);
                 if (sqlType == null) {

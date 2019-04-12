@@ -205,28 +205,42 @@ public class CanalStater {
             mqProperties.setProducerGroup(producerGroup);
         }
 
+        // flatMessage with type
+        String castBaseType = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_FLATMESSAGE_CASTBASETYPE);
+        if (castBaseType.equalsIgnoreCase("true")) {
+            mqProperties.setCastBaseType(true);
+        }
+        String castDateTime = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_FLATMESSAGE_CASTDATETIME);
+        if (castDateTime.equalsIgnoreCase("true")) {
+            mqProperties.setCastDateTime(true);
+        }
+        String flatMessageMode = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_FLATMESSAGE_MODE);
+        if (!StringUtils.isEmpty(flatMessageMode)) {
+            mqProperties.setFlatMessageMode(Integer.parseInt(flatMessageMode));
+        }
+
         // idempotence
-        String idemEnable = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_ROOT).trim();
+        String idemEnable = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_ROOT);
         if (idemEnable.equalsIgnoreCase("true")) {
             mqProperties.setIdemEnable(true);
         }
-        String idemServers = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_SERVERS).trim();
+        String idemServers = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_SERVERS);
         if (!StringUtils.isEmpty(idemServers)) {
             mqProperties.setIdemServers(idemServers);
         }
-        String idemUsername = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_USERNAME).trim();
+        String idemUsername = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_USERNAME);
         if (!StringUtils.isEmpty(idemUsername)) {
             mqProperties.setIdemUsername(idemUsername);
         }
-        String idemPassword = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_PASSWORD).trim();
+        String idemPassword = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_PASSWORD);
         if (!StringUtils.isEmpty(idemPassword)) {
             mqProperties.setIdemPassword(idemPassword);
         }
-        String idemDatabase = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_DATABASE).trim();
+        String idemDatabase = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_DATABASE);
         if (!StringUtils.isEmpty(idemDatabase)) {
             mqProperties.setIdemDatabase(idemDatabase);
         }
-        String idemKeyPredix = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_KEY_PREFIX).trim();
+        String idemKeyPredix = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_KEY_PREFIX);
         if (!StringUtils.isEmpty(idemKeyPredix)) {
             mqProperties.setIdemKeyPrefix(idemKeyPredix);
         }

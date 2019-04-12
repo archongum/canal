@@ -181,7 +181,7 @@ public class CanalKafkaProducer implements CanalMQProducer {
             }
         } else {
             // 发送扁平数据json
-            List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(message);
+            List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(message, kafkaProperties);
             // idempotence
             if (idem != null) {
                 flatMessages = idem.idemFilter(flatMessages, canalDestination.getCanalDestination());
@@ -216,10 +216,17 @@ public class CanalKafkaProducer implements CanalMQProducer {
 
     private void produce(String topicName, int partition, FlatMessage flatMessage) throws ExecutionException,
                                                                                   InterruptedException {
+        Object msg = flatMessage;
+        if (kafkaProperties.getFlatMessageMode() == 1) {
+            flatMessage.setMysqlType(null);
+            flatMessage.setSqlType(null);
+        } else if (kafkaProperties.getFlatMessageMode() == 2) {
+            msg = flatMessage.getData();
+        }
         ProducerRecord<String, String> record = new ProducerRecord<String, String>(topicName,
             partition,
             null,
-            JSON.toJSONString(flatMessage, SerializerFeature.WriteMapNullValue));
+            JSON.toJSONString(msg, SerializerFeature.WriteMapNullValue));
         if (kafkaProperties.getTransaction()) {
             producer2.send(record);
         } else {

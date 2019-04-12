@@ -1,15 +1,5 @@
 package com.alibaba.otter.canal.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.alibaba.otter.canal.filter.aviater.AviaterRegexFilter;
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.alibaba.otter.canal.protocol.CanalEntry.Entry;
@@ -22,6 +12,10 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.MigrateMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.*;
+
 
 /**
  * process MQ Message utils
@@ -111,7 +105,7 @@ public class MQMessageUtils {
      * @return 分隔后的message map
      */
     public static Map<String, Message> messageTopics(Message message, String defaultTopic, String dynamicTopicConfigs) {
-        List<CanalEntry.Entry> entries;
+        List<Entry> entries;
         if (message.isRaw()) {
             List<ByteString> rawEntries = message.getRawEntries();
             entries = new ArrayList<>(rawEntries.size());
@@ -178,7 +172,7 @@ public class MQMessageUtils {
             partitionEntries[i] = new ArrayList<>();
         }
 
-        List<CanalEntry.Entry> entries;
+        List<Entry> entries;
         if (message.isRaw()) {
             List<ByteString> rawEntries = message.getRawEntries();
             entries = new ArrayList<>(rawEntries.size());
@@ -272,17 +266,17 @@ public class MQMessageUtils {
      * @param message 原生message
      * @return FlatMessage列表
      */
-    public static List<FlatMessage> messageConverter(Message message) {
+    public static List<FlatMessage> messageConverter(Message message, MQProperties mqProperties) {
         try {
             if (message == null) {
                 return null;
             }
 
             List<FlatMessage> flatMessages = new ArrayList<>();
-            List<CanalEntry.Entry> entrys = null;
+            List<Entry> entrys = null;
             if (message.isRaw()) {
                 List<ByteString> rawEntries = message.getRawEntries();
-                entrys = new ArrayList<CanalEntry.Entry>(rawEntries.size());
+                entrys = new ArrayList<Entry>(rawEntries.size());
                 for (ByteString byteString : rawEntries) {
                     CanalEntry.Entry entry = CanalEntry.Entry.parseFrom(byteString);
                     entrys.add(entry);
@@ -320,8 +314,8 @@ public class MQMessageUtils {
                 if (!rowChange.getIsDdl()) {
                     Map<String, Integer> sqlType = new LinkedHashMap<>();
                     Map<String, String> mysqlType = new LinkedHashMap<>();
-                    List<Map<String, String>> data = new ArrayList<>();
-                    List<Map<String, String>> old = new ArrayList<>();
+                    List<Map<String, Object>> data = new ArrayList<>();
+                    List<Map<String, Object>> old = new ArrayList<>();
 
                     Set<String> updateSet = new HashSet<>();
                     boolean hasInitPkNames = false;
@@ -331,7 +325,7 @@ public class MQMessageUtils {
                             continue;
                         }
 
-                        Map<String, String> row = new LinkedHashMap<>();
+                        Map<String, Object> row = new LinkedHashMap<>();
                         List<CanalEntry.Column> columns;
 
                         if (eventType == CanalEntry.EventType.DELETE) {
@@ -349,7 +343,7 @@ public class MQMessageUtils {
                             if (column.getIsNull()) {
                                 row.put(column.getName(), null);
                             } else {
-                                row.put(column.getName(), column.getValue());
+                                row.put(column.getName(), column.getValue(mqProperties.isCastBaseType(), mqProperties.isCastDateTime()));
                             }
                             // 获取update为true的字段
                             if (column.getUpdated()) {
@@ -363,13 +357,13 @@ public class MQMessageUtils {
                         }
 
                         if (eventType == CanalEntry.EventType.UPDATE) {
-                            Map<String, String> rowOld = new LinkedHashMap<>();
+                            Map<String, Object> rowOld = new LinkedHashMap<>();
                             for (CanalEntry.Column column : rowData.getBeforeColumnsList()) {
                                 if (updateSet.contains(column.getName())) {
                                     if (column.getIsNull()) {
                                         rowOld.put(column.getName(), null);
                                     } else {
-                                        rowOld.put(column.getName(), column.getValue());
+                                        rowOld.put(column.getName(), column.getValue(mqProperties.isCastBaseType(), mqProperties.isCastDateTime()));
                                     }
                                 }
                             }
@@ -436,10 +430,10 @@ public class MQMessageUtils {
                     }
 
                     int idx = 0;
-                    for (Map<String, String> row : flatMessage.getData()) {
+                    for (Map<String, Object> row : flatMessage.getData()) {
                         int hashCode = database.hashCode();
                         for (String pkName : pkNames) {
-                            String value = row.get(pkName);
+                            Object value = row.get(pkName);
                             if (value == null) {
                                 value = "";
                             }
@@ -464,14 +458,14 @@ public class MQMessageUtils {
                             flatMessageTmp.setEs(flatMessage.getEs());
                             flatMessageTmp.setTs(flatMessage.getTs());
                         }
-                        List<Map<String, String>> data = flatMessageTmp.getData();
+                        List<Map<String, Object>> data = flatMessageTmp.getData();
                         if (data == null) {
                             data = new ArrayList<>();
                             flatMessageTmp.setData(data);
                         }
                         data.add(row);
                         if (flatMessage.getOld() != null && !flatMessage.getOld().isEmpty()) {
-                            List<Map<String, String>> old = flatMessageTmp.getOld();
+                            List<Map<String, Object>> old = flatMessageTmp.getOld();
                             if (old == null) {
                                 old = new ArrayList<>();
                                 flatMessageTmp.setOld(old);
@@ -579,7 +573,7 @@ public class MQMessageUtils {
                                        CanalEntry.Entry entry) {
         Message message = messageMap.get(topicName);
         if (message == null) {
-            message = new Message(messageId, new ArrayList<CanalEntry.Entry>());
+            message = new Message(messageId, new ArrayList<Entry>());
             messageMap.put(topicName, message);
         }
         message.getEntries().add(entry);

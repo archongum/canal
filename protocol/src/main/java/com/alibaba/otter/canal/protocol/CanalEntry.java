@@ -3,6 +3,15 @@
 
 package com.alibaba.otter.canal.protocol;
 
+import com.alibaba.otter.canal.protocol.common.DataTypeConverter;
+
+import javax.xml.bind.DatatypeConverter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Date;
+import java.sql.Types;
+
+
 public final class CanalEntry {
   private CanalEntry() {}
   public static void registerAllExtensions(
@@ -4515,6 +4524,16 @@ public final class CanalEntry {
         return s;
       }
     }
+
+    /**
+     * Cast String to accurate type
+     * @see #getValue()
+     * @return
+     */
+    public Object getValue(boolean castBaseType, boolean castDateTime) {
+      return DataTypeConverter.typeConverts(getValue(), sqlType_, castBaseType, castDateTime);
+    }
+
     /**
      * <code>optional string value = 8;</code>
      *

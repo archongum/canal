@@ -156,7 +156,7 @@ public class CanalRocketMQProducer implements CanalMQProducer {
             }
         } else {
             // 发送扁平数据json
-            List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(data);
+            List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(data, mqProperties);
             // idempotence
             if (idem != null) {
                 flatMessages = idem.idemFilter(flatMessages, destination.getCanalDestination());
@@ -178,7 +178,14 @@ public class CanalRocketMQProducer implements CanalMQProducer {
                                 }
                                 final int index = i;
                                 try {
-                                    Message message = new Message(topicName, JSON.toJSONString(flatMessagePart,
+                                    Object msg = flatMessagePart;
+                                    if (mqProperties.getFlatMessageMode() == 1) {
+                                        flatMessage.setMysqlType(null);
+                                        flatMessage.setSqlType(null);
+                                    } else if (mqProperties.getFlatMessageMode() == 2) {
+                                        msg = flatMessage.getData();
+                                    }
+                                    Message message = new Message(topicName, JSON.toJSONString(msg,
                                         SerializerFeature.WriteMapNullValue).getBytes());
                                     this.defaultMQProducer.send(message, new MessageQueueSelector() {
 
@@ -206,7 +213,14 @@ public class CanalRocketMQProducer implements CanalMQProducer {
                                     topicName,
                                     partition);
                             }
-                            Message message = new Message(topicName, JSON.toJSONString(flatMessage,
+                            Object msg = flatMessage;
+                            if (mqProperties.getFlatMessageMode() == 1) {
+                                flatMessage.setMysqlType(null);
+                                flatMessage.setSqlType(null);
+                            } else if (mqProperties.getFlatMessageMode() == 2) {
+                                msg = flatMessage.getData();
+                            }
+                            Message message = new Message(topicName, JSON.toJSONString(msg,
                                 SerializerFeature.WriteMapNullValue).getBytes());
                             this.defaultMQProducer.send(message, new MessageQueueSelector() {
 

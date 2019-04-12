@@ -54,6 +54,14 @@ public class CanalConstants {
     public static final String CANAL_ALIYUN_SECRETKEY            = ROOT + "." + "aliyun.secretKey";
     public static final String CANAL_MQ_PROPERTIES               = ROOT + "." + "mq.properties";
 
+    public static final String CANAL_MQ_FLATMESSAGE_CASTBASETYPE  = ROOT + "." + "mq.flatMessage.castBaseType";
+    public static final String CANAL_MQ_FLATMESSAGE_CASTDATETIME  = ROOT + "." + "mq.flatMessage.castDateTime";
+    public static final String CANAL_MQ_FLATMESSAGE_MODE           = ROOT + "." + "mq.flatMessage.mode";
+
+    public static final int FLATMESSAGE_MODE_NORMAL             = 0;
+    public static final int FLATMESSAGE_MODE_IGNORE_SQLTYPE    = 1;
+    public static final int FLATMESSAGE_MODE_DATA_ONLY          = 2;
+
     // idempotence
     public static final String CANAL_MQ_IDEMPOTENCE_ROOT        = ROOT + "." + "mq.idempotence";
     public static final String CANAL_MQ_IDEMPOTENCE_SERVERS     = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "servers";

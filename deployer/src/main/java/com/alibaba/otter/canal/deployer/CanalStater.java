@@ -1,15 +1,5 @@
 package com.alibaba.otter.canal.deployer;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.otter.canal.common.MQProperties;
 import com.alibaba.otter.canal.kafka.CanalKafkaProducer;
 import com.alibaba.otter.canal.rocketmq.CanalRocketMQProducer;
@@ -18,6 +8,15 @@ import com.alibaba.otter.canal.spi.CanalMQProducer;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Canal server 启动类
@@ -204,6 +203,28 @@ public class CanalStater {
         String producerGroup = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_PRODUCERGROUP);
         if (!StringUtils.isEmpty(producerGroup)) {
             mqProperties.setProducerGroup(producerGroup);
+        }
+
+        // idempotence
+        String idemServers = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_SERVERS).trim();
+        if (!StringUtils.isEmpty(idemServers)) {
+            mqProperties.setIdemServers(idemServers);
+        }
+        String idemUsername = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_USERNAME).trim();
+        if (!StringUtils.isEmpty(idemUsername)) {
+            mqProperties.setIdemUsername(idemUsername);
+        }
+        String idemPassword = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_PASSWORD).trim();
+        if (!StringUtils.isEmpty(idemPassword)) {
+            mqProperties.setIdemPassword(idemPassword);
+        }
+        String idemDatabase = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_DATABASE).trim();
+        if (!StringUtils.isEmpty(idemDatabase)) {
+            mqProperties.setIdemDatabase(idemDatabase);
+        }
+        String idemKeyPredix = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_KEY_PREFIX).trim();
+        if (!StringUtils.isEmpty(idemKeyPredix)) {
+            mqProperties.setIdemKeyPrefix(idemKeyPredix);
         }
 
         for (Object key : properties.keySet()) {

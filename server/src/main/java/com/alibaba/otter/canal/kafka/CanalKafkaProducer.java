@@ -1,11 +1,13 @@
 package com.alibaba.otter.canal.kafka;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.otter.canal.common.IdempotenceClient;
+import com.alibaba.otter.canal.common.MQMessageUtils;
+import com.alibaba.otter.canal.common.MQProperties;
+import com.alibaba.otter.canal.protocol.FlatMessage;
+import com.alibaba.otter.canal.protocol.Message;
+import com.alibaba.otter.canal.spi.CanalMQProducer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -14,13 +16,12 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.otter.canal.common.MQMessageUtils;
-import com.alibaba.otter.canal.common.MQProperties;
-import com.alibaba.otter.canal.protocol.FlatMessage;
-import com.alibaba.otter.canal.protocol.Message;
-import com.alibaba.otter.canal.spi.CanalMQProducer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
 
 /**
  * kafka producer 主操作类
@@ -34,7 +35,9 @@ public class CanalKafkaProducer implements CanalMQProducer {
 
     private Producer<String, Message> producer;
     private Producer<String, String>  producer2;                                                 // 用于扁平message的数据投递
-    private MQProperties              kafkaProperties;
+    private MQProperties kafkaProperties;
+
+    private IdempotenceClient idem;
 
     @Override
     public void init(MQProperties kafkaProperties) {
@@ -73,6 +76,9 @@ public class CanalKafkaProducer implements CanalMQProducer {
                 producer2.initTransactions();
             }
         }
+
+        idem = new IdempotenceClient(kafkaProperties);
+        logger.info("[idempotence] props: {}", idem);
     }
 
     @Override
@@ -85,6 +91,9 @@ public class CanalKafkaProducer implements CanalMQProducer {
             if (producer2 != null) {
                 producer2.close();
             }
+            if (idem != null) {
+                idem.stop();
+            }
         } catch (Throwable e) {
             logger.warn("##something goes wrong when stopping kafka producer:", e);
         } finally {
@@ -93,7 +102,8 @@ public class CanalKafkaProducer implements CanalMQProducer {
     }
 
     @Override
-    public void send(MQProperties.CanalDestination canalDestination, Message message, Callback callback) {
+    public void send(
+        MQProperties.CanalDestination canalDestination, Message message, Callback callback) {
         // 开启事务，需要kafka版本支持
         Producer producerTmp;
         if (!kafkaProperties.getFlatMessage()) {
@@ -136,7 +146,8 @@ public class CanalKafkaProducer implements CanalMQProducer {
         }
     }
 
-    private void send(MQProperties.CanalDestination canalDestination, String topicName, Message message)
+    private void send(
+        MQProperties.CanalDestination canalDestination, String topicName, Message message)
                                                                                                         throws Exception {
         if (!kafkaProperties.getFlatMessage()) {
             List<ProducerRecord<String, Message>> records = new ArrayList<ProducerRecord<String, Message>>();
@@ -168,6 +179,8 @@ public class CanalKafkaProducer implements CanalMQProducer {
         } else {
             // 发送扁平数据json
             List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(message);
+            // idempotence
+            flatMessages = idem.idemFilter(flatMessages, canalDestination.getCanalDestination());
             if (flatMessages != null) {
                 for (FlatMessage flatMessage : flatMessages) {
                     if (canalDestination.getPartitionHash() != null && !canalDestination.getPartitionHash().isEmpty()) {

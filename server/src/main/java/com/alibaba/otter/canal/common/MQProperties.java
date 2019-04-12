@@ -28,6 +28,13 @@ public class MQProperties {
     private boolean    transaction            = false;           // 是否开启事务
     private Properties properties             = new Properties();
 
+    // idempotence
+    private String     idemServers            = "127.0.0.1:6379";
+    private String     idemUsername           = "";
+    private String     idemPassword           = "";
+    private String     idemDatabase           = "0";
+    private String     idemKeyPrefix          = "canal-idem-";
+
     public static class CanalDestination {
 
         private String  canalDestination;
@@ -220,5 +227,61 @@ public class MQProperties {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public String getIdemServers() {
+        return idemServers;
+    }
+
+    public void setIdemServers(String idemServers) {
+        this.idemServers = idemServers;
+    }
+
+    public String getIdemUsername() {
+        return idemUsername;
+    }
+
+    public void setIdemUsername(String idemUsername) {
+        this.idemUsername = idemUsername;
+    }
+
+    public String getIdemPassword() {
+        return idemPassword;
+    }
+
+    public void setIdemPassword(String idemPassword) {
+        this.idemPassword = idemPassword;
+    }
+
+    public String getIdemDatabase() {
+        return idemDatabase;
+    }
+
+    public void setIdemDatabase(String idemDatabase) {
+        this.idemDatabase = idemDatabase;
+    }
+
+    public String getIdemKeyPrefix() {
+        return idemKeyPrefix;
+    }
+
+    public void setIdemKeyPrefix(String idemKeyPrefix) {
+        this.idemKeyPrefix = idemKeyPrefix;
+    }
+
+    @Override
+    public String toString() {
+        return "MQProperties{" + "servers='" + servers + '\'' + ", retries=" + retries
+            + ", batchSize=" + batchSize + ", lingerMs=" + lingerMs + ", maxRequestSize="
+            + maxRequestSize + ", bufferMemory=" + bufferMemory + ", filterTransactionEntry="
+            + filterTransactionEntry + ", producerGroup='" + producerGroup + '\''
+            + ", canalBatchSize=" + canalBatchSize + ", canalGetTimeout=" + canalGetTimeout
+            + ", flatMessage=" + flatMessage + ", compressionType='" + compressionType + '\''
+            + ", acks='" + acks + '\'' + ", aliyunAccessKey='" + aliyunAccessKey + '\''
+            + ", aliyunSecretKey='" + aliyunSecretKey + '\'' + ", transaction=" + transaction
+            + ", properties=" + properties + ", idemServers='" + idemServers + '\''
+            + ", idemUsername='" + idemUsername + '\'' + ", idemPassword='" + idemPassword + '\''
+            + ", idemDatabase='" + idemDatabase + '\'' + ", idemKeyPrefix='" + idemKeyPrefix + '\''
+            + '}';
     }
 }

@@ -54,6 +54,14 @@ public class CanalConstants {
     public static final String CANAL_ALIYUN_SECRETKEY            = ROOT + "." + "aliyun.secretKey";
     public static final String CANAL_MQ_PROPERTIES               = ROOT + "." + "mq.properties";
 
+    // idempotence
+    public static final String CANAL_MQ_IDEMPOTENCE_ROOT        = ROOT + "." + "mq.idempotence";
+    public static final String CANAL_MQ_IDEMPOTENCE_SERVERS     = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "servers";
+    public static final String CANAL_MQ_IDEMPOTENCE_USERNAME    = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "username";
+    public static final String CANAL_MQ_IDEMPOTENCE_PASSWORD    = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "password";
+    public static final String CANAL_MQ_IDEMPOTENCE_DATABASE    = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "database";
+    public static final String CANAL_MQ_IDEMPOTENCE_KEY_PREFIX  = CANAL_MQ_IDEMPOTENCE_ROOT + "." + "key.prefix";
+
     public static String getInstanceModeKey(String destination) {
         return MessageFormat.format(INSTANCE_MODE_TEMPLATE, destination);
     }

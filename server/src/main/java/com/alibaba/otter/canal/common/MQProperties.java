@@ -29,6 +29,7 @@ public class MQProperties {
     private Properties properties             = new Properties();
 
     // idempotence
+    private boolean    idemEnable             = false;
     private String     idemServers            = "127.0.0.1:6379";
     private String     idemUsername           = "";
     private String     idemPassword           = "";
@@ -227,6 +228,14 @@ public class MQProperties {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public boolean isIdemEnable() {
+        return idemEnable;
+    }
+
+    public void setIdemEnable(boolean idemEnable) {
+        this.idemEnable = idemEnable;
     }
 
     public String getIdemServers() {

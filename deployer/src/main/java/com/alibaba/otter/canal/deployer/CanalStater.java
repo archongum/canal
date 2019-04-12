@@ -206,6 +206,10 @@ public class CanalStater {
         }
 
         // idempotence
+        String idemEnable = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_ROOT).trim();
+        if (idemEnable.equalsIgnoreCase("true")) {
+            mqProperties.setIdemEnable(true);
+        }
         String idemServers = CanalController.getProperty(properties, CanalConstants.CANAL_MQ_IDEMPOTENCE_SERVERS).trim();
         if (!StringUtils.isEmpty(idemServers)) {
             mqProperties.setIdemServers(idemServers);

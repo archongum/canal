@@ -77,8 +77,11 @@ public class CanalKafkaProducer implements CanalMQProducer {
             }
         }
 
-        idem = new IdempotenceClient(kafkaProperties);
-        logger.info("[idempotence] props: {}", idem);
+        // idempotence
+        if (kafkaProperties.isIdemEnable()) {
+            idem = new IdempotenceClient(kafkaProperties);
+            logger.info("[idempotence] props: {}", idem);
+        }
     }
 
     @Override
@@ -180,7 +183,9 @@ public class CanalKafkaProducer implements CanalMQProducer {
             // 发送扁平数据json
             List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(message);
             // idempotence
-            flatMessages = idem.idemFilter(flatMessages, canalDestination.getCanalDestination());
+            if (idem != null) {
+                flatMessages = idem.idemFilter(flatMessages, canalDestination.getCanalDestination());
+            }
             if (flatMessages != null) {
                 for (FlatMessage flatMessage : flatMessages) {
                     if (canalDestination.getPartitionHash() != null && !canalDestination.getPartitionHash().isEmpty()) {

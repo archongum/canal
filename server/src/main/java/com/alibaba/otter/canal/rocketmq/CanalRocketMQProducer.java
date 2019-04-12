@@ -52,8 +52,10 @@ public class CanalRocketMQProducer implements CanalMQProducer {
         defaultMQProducer.setVipChannelEnabled(false);
 
         // idempotence
-        idem = new IdempotenceClient(rocketMQProperties);
-        logger.info("[idempotence] props: {}", idem);
+        if (rocketMQProperties.isIdemEnable()) {
+            idem = new IdempotenceClient(rocketMQProperties);
+            logger.info("[idempotence] props: {}", idem);
+        }
 
         logger.info("##Start RocketMQ producer##");
         try {
@@ -156,7 +158,9 @@ public class CanalRocketMQProducer implements CanalMQProducer {
             // 发送扁平数据json
             List<FlatMessage> flatMessages = MQMessageUtils.messageConverter(data);
             // idempotence
-            flatMessages = idem.idemFilter(flatMessages, destination.getCanalDestination());
+            if (idem != null) {
+                flatMessages = idem.idemFilter(flatMessages, destination.getCanalDestination());
+            }
             if (flatMessages != null) {
                 for (FlatMessage flatMessage : flatMessages) {
                     if (destination.getPartitionHash() != null && !destination.getPartitionHash().isEmpty()) {

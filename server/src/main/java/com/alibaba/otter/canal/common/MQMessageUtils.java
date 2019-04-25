@@ -285,6 +285,8 @@ public class MQMessageUtils {
                 entrys = message.getEntries();
             }
 
+            // Fix System.currentTimeMillis() will produce the same value
+            long offset = 0;
             for (CanalEntry.Entry entry : entrys) {
                 if (entry.getEntryType() == CanalEntry.EntryType.TRANSACTIONBEGIN
                     || entry.getEntryType() == CanalEntry.EntryType.TRANSACTIONEND) {
@@ -308,7 +310,7 @@ public class MQMessageUtils {
                 flatMessage.setIsDdl(rowChange.getIsDdl());
                 flatMessage.setType(eventType.toString());
                 flatMessage.setEs(entry.getHeader().getExecuteTime());
-                flatMessage.setTs(System.currentTimeMillis());
+                flatMessage.setTs(System.currentTimeMillis() + offset++);
                 flatMessage.setSql(rowChange.getSql());
 
                 if (!rowChange.getIsDdl()) {

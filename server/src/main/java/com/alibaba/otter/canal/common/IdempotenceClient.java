@@ -28,7 +28,10 @@ public class IdempotenceClient {
     private static int     database = Protocol.DEFAULT_DATABASE;
 
     private MQProperties properties;
-    private JedisPool jedisPool;
+    private JedisPool    jedisPool;
+
+    private static final int MAX_COUNTDOWN = 100000;
+    private int              cleanupCountdown = MAX_COUNTDOWN;
 
     public IdempotenceClient(MQProperties properties) {
         this.properties = properties;
@@ -46,6 +49,7 @@ public class IdempotenceClient {
                 String es = String.valueOf(flatMessage.getEs() / 1000);
                 String dataHashCode = String.valueOf(flatMessage.getData().hashCode());
                 String member = es + "_" + dataHashCode;
+                cleanupSet(jedis, key); // avoid large redis set.
                 if (!jedis.sismember(key, member)) {
                     newFlatMessages.add(flatMessage);
                     jedis.sadd(key, member);
@@ -59,6 +63,13 @@ public class IdempotenceClient {
 
     public void stop() {
         jedisPool.close();
+    }
+
+    private void cleanupSet(Jedis jedis, String key) {
+        if (--this.cleanupCountdown < 0) {
+            jedis.del(key);
+            this.cleanupCountdown = MAX_COUNTDOWN;
+        }
     }
 
     private void init() {
